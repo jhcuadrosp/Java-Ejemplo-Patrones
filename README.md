@@ -1,75 +1,199 @@
 # Java-Ejemplo-Patrones
 
-Ejercicio educativo de Java puro para practicar Programación Orientada a Objetos y el patrón de diseño **Adapter**.
+Ejercicio educativo de Java puro para explicar Programacion Orientada a Objetos y el patron de diseno **Adapter** de forma simple.
 
-## Caso de estudio
+## Descripcion del problema
 
-El aplicativo modela dispositivos de manipulación de un televisor. Inicialmente el sistema funciona con una jerarquía de clases para dispositivos como:
+El sistema modela dispositivos que permiten manipular un televisor. Inicialmente existen dos dispositivos que funcionan bien con una misma abstraccion:
 
 - `ControlInfrarrojo`
 - `PanelTV`
 
-Estos dispositivos comparten operaciones básicas:
+Ambos pueden:
 
-- Encender.
-- Apagar.
-- Manipular volumen.
-- Cambiar entrada.
+- Encender el televisor.
+- Apagar el televisor.
+- Manipular el volumen.
+- Cambiar la entrada.
 
-Luego se requiere incorporar un `SmartPhone`, que puede realizar las mismas acciones mediante WiFi y una aplicación. Sin embargo, sus procesos internos siguen una secuencia diferente:
+Luego se requiere agregar un `SmartPhone`. El smartphone tambien puede realizar esas acciones, pero internamente funciona de otra manera porque necesita abrir una aplicacion, buscar dispositivos en la red WiFi y seleccionar el televisor antes de enviar una orden.
 
-- Encender: iniciar aplicación, scanear dispositivos en la red, seleccionar dispositivo, iniciar dispositivo.
-- Apagar: iniciar aplicación, scanear dispositivos en la red, seleccionar dispositivo, detener dispositivo.
-- Manipular volumen: iniciar aplicación, scanear dispositivos en la red, seleccionar dispositivo, manipular volumen.
-- Cambiar entrada: iniciar aplicación, scanear dispositivos en la red, seleccionar dispositivo, cambiar entrada.
+Por esa diferencia, `SmartPhone` no debe heredar ni implementar directamente `DispositivoManipulacionTV`.
 
-Por esta diferencia, `SmartPhone` no debe heredar directamente de `DispositivoManipulacionTV`.
+## Patron Adapter
 
-## Patrón recomendado
+El patron **Adapter** permite que una clase con una interfaz diferente pueda ser usada por un sistema que espera otra interfaz.
 
-El patrón recomendado es **Adapter**.
+En este ejercicio:
 
-Se usa porque permite incorporar una clase con una interfaz incompatible (`SmartPhone`) dentro de un sistema que ya espera trabajar con otra abstracción (`DispositivoManipulacionTV`).
+- El sistema espera objetos de tipo `DispositivoManipulacionTV`.
+- `SmartPhone` tiene metodos propios y una secuencia de uso distinta.
+- `SmartPhoneAdapter` implementa `DispositivoManipulacionTV`.
+- `SmartPhoneAdapter` recibe un `SmartPhone` y delega en el sus operaciones reales.
 
-La solución consiste en crear un `AdaptadorSmartPhone` que se comporte como un dispositivo de manipulación de TV, pero que internamente delegue las acciones al `SmartPhone` ejecutando la secuencia correcta.
+## Por que SmartPhone no hereda directamente
 
-## Por qué no otros patrones
+`SmartPhone` no representa naturalmente un dispositivo tradicional de manipulacion de TV. Sus pasos internos son diferentes:
 
-- `Strategy`: sirve para intercambiar algoritmos, pero aquí el problema principal es adaptar una interfaz incompatible.
-- `Template Method`: requiere una estructura común basada en herencia, justo lo que se quiere evitar para `SmartPhone`.
-- `Bridge`: sería útil para rediseñar la separación entre abstracción e implementación, pero resulta más grande de lo necesario para este caso.
-- `Facade`: simplifica operaciones complejas, pero no adapta directamente una clase a la interfaz esperada por el sistema.
+1. Iniciar aplicacion.
+2. Scanear dispositivos en la red.
+3. Seleccionar dispositivo.
+4. Ejecutar la accion solicitada.
+
+Forzarlo a heredar o implementar directamente `DispositivoManipulacionTV` mezclaria responsabilidades y ocultaria el problema real. El adaptador mantiene limpia la clase `SmartPhone` y permite integrarla sin modificar las clases existentes.
+
+## Solucion propuesta
+
+La solucion mantiene el contrato existente `DispositivoManipulacionTV` para los dispositivos tradicionales. Luego se agrega una clase adaptadora:
+
+- `ControlInfrarrojo` implementa `DispositivoManipulacionTV`.
+- `PanelTV` implementa `DispositivoManipulacionTV`.
+- `SmartPhone` conserva sus propios metodos.
+- `SmartPhoneAdapter` implementa `DispositivoManipulacionTV` y usa composicion para recibir un `SmartPhone`.
+- `Main` demuestra que los tres dispositivos se pueden usar polimorficamente desde una misma lista.
 
 ## Estructura del proyecto
 
 ```text
-src/main/java/com/ejemplo/televisor
-src/main/java/com/ejemplo/televisor/dispositivo
-src/main/java/com/ejemplo/televisor/smartphone
-src/main/java/com/ejemplo/televisor/adaptador
+src/
+└── main/
+    └── java/
+        └── com/
+            └── ejemplo/
+                └── televisor/
+                    ├── Main.java
+                    ├── adaptador/
+                    │   └── SmartPhoneAdapter.java
+                    ├── dispositivo/
+                    │   ├── ControlInfrarrojo.java
+                    │   ├── DispositivoManipulacionTV.java
+                    │   └── PanelTV.java
+                    └── smartphone/
+                        └── SmartPhone.java
 ```
 
-## Clases previstas
+## Diagrama de clases
 
-- `Main`: demostrará el uso del sistema.
-- `DispositivoManipulacionTV`: definirá las operaciones esperadas para controlar el televisor.
-- `ControlInfrarrojo`: dispositivo existente que controla el televisor directamente.
-- `PanelTV`: dispositivo existente que controla el televisor desde el panel físico.
-- `SmartPhone`: clase nueva con operaciones propias de conexión WiFi y aplicación.
-- `AdaptadorSmartPhone`: adaptador que permite usar `SmartPhone` como `DispositivoManipulacionTV`.
+```mermaid
+classDiagram
+    class DispositivoManipulacionTV {
+        <<interface>>
+        +encender()
+        +apagar()
+        +manipularVolumen()
+        +cambiarEntrada()
+    }
 
-## Conceptos aplicados
+    class ControlInfrarrojo {
+        +encender()
+        +apagar()
+        +manipularVolumen()
+        +cambiarEntrada()
+    }
 
-- Encapsulamiento en las clases concretas.
-- Herencia o implementación de una abstracción común para los dispositivos existentes.
-- Polimorfismo al tratar `ControlInfrarrojo`, `PanelTV` y `AdaptadorSmartPhone` como dispositivos de manipulación de TV.
-- Abstracción mediante el contrato común `DispositivoManipulacionTV`.
-- Patrón Adapter para respetar el principio abierto/cerrado.
+    class PanelTV {
+        +encender()
+        +apagar()
+        +manipularVolumen()
+        +cambiarEntrada()
+    }
 
-## Notas técnicas
+    class SmartPhone {
+        +iniciarAplicacion()
+        +scanearDispositivosEnLaRed()
+        +seleccionarDispositivo()
+        +iniciarDispositivo()
+        +detenerDispositivo()
+        +manipularVolumen()
+        +cambiarEntrada()
+    }
 
-- Usar Java 17 o superior.
-- No usar Spring Boot.
-- No usar frameworks externos.
-- No usar base de datos.
-- No requiere Maven ni Gradle.
+    class SmartPhoneAdapter {
+        -SmartPhone smartPhone
+        +SmartPhoneAdapter(SmartPhone smartPhone)
+        +encender()
+        +apagar()
+        +manipularVolumen()
+        +cambiarEntrada()
+    }
+
+    DispositivoManipulacionTV <|.. ControlInfrarrojo
+    DispositivoManipulacionTV <|.. PanelTV
+    DispositivoManipulacionTV <|.. SmartPhoneAdapter
+    SmartPhoneAdapter --> SmartPhone : adapta
+```
+
+## Explicacion de las clases
+
+- `DispositivoManipulacionTV`: interfaz que define las operaciones comunes para manipular un televisor.
+- `ControlInfrarrojo`: dispositivo tradicional que implementa directamente las operaciones del contrato.
+- `PanelTV`: panel fisico del televisor que implementa las mismas operaciones.
+- `SmartPhone`: clase independiente con metodos propios para operar mediante aplicacion y WiFi.
+- `SmartPhoneAdapter`: adaptador que permite usar un `SmartPhone` como si fuera un `DispositivoManipulacionTV`.
+- `Main`: clase de demostracion que recorre una lista de dispositivos y ejecuta las mismas operaciones en todos.
+
+## Conceptos POO aplicados
+
+- Abstraccion: `DispositivoManipulacionTV` define que debe hacer un dispositivo, sin imponer como lo hace.
+- Herencia o implementacion: `ControlInfrarrojo`, `PanelTV` y `SmartPhoneAdapter` implementan el mismo contrato.
+- Polimorfismo: `Main` usa una lista de `DispositivoManipulacionTV` para tratar todos los dispositivos de la misma forma.
+- Encapsulamiento: `SmartPhoneAdapter` mantiene privado el `SmartPhone` que adapta.
+- Composicion: `SmartPhoneAdapter` contiene un `SmartPhone` y delega trabajo en el.
+
+## Compilar y ejecutar en IntelliJ IDEA
+
+1. Abrir IntelliJ IDEA.
+2. Seleccionar `File > Open`.
+3. Elegir la carpeta del proyecto.
+4. Configurar un SDK de Java 17 o superior.
+5. Abrir la clase `src/main/java/com/ejemplo/televisor/Main.java`.
+6. Ejecutar el metodo `main` con el boton verde de IntelliJ.
+
+## Compilar y ejecutar por consola
+
+Desde la raiz del proyecto:
+
+```bat
+mkdir build\classes
+dir /s /b src\main\java\*.java > fuentes.txt
+javac -encoding UTF-8 -d build\classes @fuentes.txt
+java -cp build\classes com.ejemplo.televisor.Main
+del fuentes.txt
+```
+
+## Ejemplo esperado de salida
+
+```text
+========================================
+Dispositivo: ControlInfrarrojo
+========================================
+Control infrarrojo: enviando senal para encender el televisor.
+Control infrarrojo: ajustando el volumen con botones fisicos.
+Control infrarrojo: cambiando la entrada del televisor.
+Control infrarrojo: enviando senal para apagar el televisor.
+
+========================================
+Dispositivo: PanelTV
+========================================
+Panel TV: encendiendo el televisor desde el boton del panel.
+Panel TV: ajustando el volumen desde el panel frontal.
+Panel TV: cambiando la entrada desde el panel del televisor.
+Panel TV: apagando el televisor desde el boton del panel.
+
+========================================
+Dispositivo: SmartPhoneAdapter
+========================================
+SmartPhone: iniciando la aplicacion de control remoto.
+SmartPhone: scaneando dispositivos disponibles en la red WiFi.
+SmartPhone: seleccionando el televisor encontrado.
+SmartPhone: enviando orden para iniciar el televisor.
+...
+```
+
+## Notas tecnicas
+
+- Java puro.
+- Sin Spring Boot.
+- Sin frameworks externos.
+- Sin base de datos.
+- Sin Maven ni Gradle.

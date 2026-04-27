@@ -73,4 +73,4 @@ com.ejemplo.televisor.adaptador
 - `ControlInfrarrojo`, en `com.ejemplo.televisor.dispositivo`.
 - `PanelTV`, en `com.ejemplo.televisor.dispositivo`.
 - `SmartPhone`, en `com.ejemplo.televisor.smartphone`.
-- `AdaptadorSmartPhone`, en `com.ejemplo.televisor.adaptador`.
+- `SmartPhoneAdapter`, en `com.ejemplo.televisor.adaptador`.
