@@ -15,15 +15,23 @@ Implementar un sistema básico para una biblioteca aplicando:
 
 ## Reglas técnicas
 
-- Usar Java puro.
+- Usar Java puro, versión 17 o superior.
 - No usar Spring Boot.
 - No usar frameworks externos.
+- No usar frameworks innecesarios.
 - No usar base de datos.
 - No usar Maven ni Gradle si el proyecto no lo requiere.
-- Mantener el código simple, claro y entendible para estudiantes.
+- Mantener el código simple, claro, educativo y entendible para estudiantes.
+- Aplicar encapsulamiento, herencia, polimorfismo y abstracción en el diseño de las clases.
 - Usar nombres en español para clases, métodos y atributos.
-- Documentar las clases principales con comentarios JavaDoc.
+- Documentar brevemente las clases y métodos principales con comentarios JavaDoc.
 - El proyecto debe poder ejecutarse desde una clase `Main`.
+
+## Antes de modificar archivos
+
+- Primero explicar brevemente el plan.
+- Luego implementar los cambios.
+- Al final resumir los archivos creados o modificados.
 
 ## Estructura esperada
 
